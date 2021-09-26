@@ -1,0 +1,7 @@
+#box {
+    flex-grow: 1;
+}
+
+ListView {
+    flex-grow: 1;
+}

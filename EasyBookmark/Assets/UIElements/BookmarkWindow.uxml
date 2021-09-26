@@ -1,5 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement name="box" style="flex-grow: 1; position: absolute; left: 0; top: 0; right: 0; bottom: 0;">
-        <ui:ListView focusable="true" style="flex-shrink: 0; flex-grow: 1;" />
+    <Style src="BookmarkWindow.uss" />
+    <ui:VisualElement name="box">
+        <ui:ListView />
     </ui:VisualElement>
 </ui:UXML>

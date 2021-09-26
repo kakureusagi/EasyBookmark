@@ -1,9 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="BookmarkItem.uss" />
-    <ui:VisualElement name="root" style="flex-direction: row; overflow: hidden; min-width: 230px; flex-shrink: 0; border-bottom-width: 1px; border-top-width: 1px;">
+    <ui:VisualElement name="root">
         <ui:Button text="Select" display-tooltip-when-elided="true" name="selectButton" />
         <ui:Button text="Open" display-tooltip-when-elided="true" name="openButton" />
-        <ui:Label text="Asset Path..." display-tooltip-when-elided="true" name="path" style="justify-content: flex-start; -unity-text-align: middle-left; flex-grow: 1;" />
+        <ui:Label text="Asset Path..." display-tooltip-when-elided="true" name="path" />
         <ui:Button text="X" display-tooltip-when-elided="true" name="deleteButton" />
     </ui:VisualElement>
 </ui:UXML>

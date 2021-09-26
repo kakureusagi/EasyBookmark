@@ -1,3 +1,18 @@
 #root {
-    background-color: rgba(1, 1, 1, 0);
+    flex-direction: row;
+    border-bottom-width: 1px;
+    border-top-width: 1px;
+}
+
+.border-top {
+    border-top-color: white;
+}
+
+.border-bottom {
+    border-bottom-color: white;
+}
+
+#path {
+    -unity-text-align: middle-left;
+    flex-grow: 1;
 }

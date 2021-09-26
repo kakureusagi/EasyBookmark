@@ -1,6 +1,5 @@
 using System;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
@@ -10,9 +9,11 @@ namespace Editor
 	{
 		public static readonly int Height = 22;
 
+		static readonly string TopBorderClass = "border-top";
+		static readonly string BottomBorderClass = "border-bottom";
+
 		public string AssetPath { get; private set; }
 		public AssetCategory Category { get; private set; }
-		public LinePosition LinePosition { get; private set; }
 
 		VisualElement root;
 		Label pathLabel;
@@ -20,7 +21,8 @@ namespace Editor
 		Button selectButton;
 		Button deleteButton;
 		ITestElementCallbackReceiver callbackReceiver;
-
+		
+		LinePosition linePosition;
 		bool hasEnter;
 
 		public BookmarkItem()
@@ -92,13 +94,13 @@ namespace Editor
 		{
 			if (hasEnter)
 			{
-				LinePosition = e.localMousePosition.y > Height / 2.0f ? LinePosition.Bottom : LinePosition.Top;
+				linePosition = e.localMousePosition.y > Height / 2.0f ? LinePosition.Bottom : LinePosition.Top;
 				DragAndDrop.visualMode = DragAndDropVisualMode.Move;
-				EnableLine(LinePosition);
+				EnableLine(linePosition);
 			}
 			else
 			{
-				LinePosition = LinePosition.None;
+				linePosition = LinePosition.None;
 				DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
 			}
 		}
@@ -107,8 +109,8 @@ namespace Editor
 		{
 			if (hasEnter)
 			{
-				callbackReceiver.OnDragPerform(this, LinePosition);
-				LinePosition = LinePosition.None;
+				callbackReceiver.OnDragPerform(this, linePosition);
+				linePosition = LinePosition.None;
 				DisableLine();
 				hasEnter = false;
 			}
@@ -128,22 +130,22 @@ namespace Editor
 
 		void EnableLine(LinePosition position)
 		{
+			DisableLine();
+			
 			if (position == LinePosition.Top)
 			{
-				root.style.borderBottomColor = new StyleColor(Color.clear);
-				root.style.borderTopColor = new StyleColor(Color.white);
+				root.AddToClassList(TopBorderClass);
 			}
 			else
 			{
-				root.style.borderBottomColor = new StyleColor(Color.white);
-				root.style.borderTopColor = new StyleColor(Color.clear);
+				root.AddToClassList(BottomBorderClass);
 			}
 		}
 
 		void DisableLine()
 		{
-			root.style.borderBottomColor = new StyleColor(Color.clear);
-			root.style.borderTopColor = new StyleColor(Color.clear);
+			root.RemoveFromClassList(TopBorderClass);
+			root.RemoveFromClassList(BottomBorderClass);
 		}
 	}
 }
