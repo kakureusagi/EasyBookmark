@@ -24,8 +24,8 @@ namespace EasyBookmark
 
 		void CreateGUI()
 		{
-			var tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UIElements/BookmarkWindow.uxml");
-			tree.CloneTree(rootVisualElement);
+			var treeStorage = VisualTreeStorage.Load();
+			treeStorage.BookmarkWindow.CloneTree(rootVisualElement);
 
 			categorizer = new AssetCategorizer();
 

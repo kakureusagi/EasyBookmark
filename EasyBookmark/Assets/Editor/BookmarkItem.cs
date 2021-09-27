@@ -1,4 +1,5 @@
 using System;
+using EasyBookmark;
 using UnityEditor;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
@@ -27,8 +28,8 @@ namespace Editor
 
 		public BookmarkItem()
 		{
-			var tree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UIElements/BookmarkItem.uxml");
-			var container = tree.Instantiate();
+			var treeStorage = VisualTreeStorage.Load();
+			var container = treeStorage.BookmarkItem.Instantiate();
 			hierarchy.Add(container);
 
 			root = container.Q<VisualElement>("root");
