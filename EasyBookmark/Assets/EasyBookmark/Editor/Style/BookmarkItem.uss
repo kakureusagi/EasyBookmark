@@ -13,6 +13,7 @@
 }
 
 #path {
+    overflow: hidden;
     -unity-text-align: middle-left;
     flex-grow: 1;
 }

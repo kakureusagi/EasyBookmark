@@ -3,7 +3,9 @@
     <ui:VisualElement name="root">
         <ui:Button text="Select" display-tooltip-when-elided="true" name="selectButton" />
         <ui:Button text="Open" display-tooltip-when-elided="true" name="openButton" />
-        <ui:Label text="Asset Path..." display-tooltip-when-elided="true" name="path" />
+        <ui:VisualElement name="pathRoot" style="flex-grow: 1;">
+            <ui:Label text="Asset Path..." display-tooltip-when-elided="true" name="path" style="overflow: hidden; font-size: 12px;" />
+        </ui:VisualElement>
         <ui:Button text="X" display-tooltip-when-elided="true" name="deleteButton" />
     </ui:VisualElement>
 </ui:UXML>
