@@ -18,6 +18,6 @@ public class PostProcessor : AssetPostprocessor
 
 	static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
 	{
-		callback();
+		callback?.Invoke();
 	}
 }
