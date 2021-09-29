@@ -11,7 +11,7 @@ namespace EasyBookmark
 		[Serializable]
 		class Data
 		{
-			public string[] Paths = Array.Empty<string>();
+			public string[] Guids = Array.Empty<string>();
 		}
 
 
@@ -24,15 +24,15 @@ namespace EasyBookmark
 			data = LoadImpl();
 		}
 
-		public void Save(IList<string> paths)
+		public void Save(IEnumerable<string> guids)
 		{
-			data.Paths = paths.ToArray();
+			data.Guids = guids.ToArray();
 			SaveImpl(data);
 		}
 
 		public string[] Load()
 		{
-			return data.Paths.ToArray();
+			return data.Guids.ToArray();
 		}
 
 		private Data LoadImpl()

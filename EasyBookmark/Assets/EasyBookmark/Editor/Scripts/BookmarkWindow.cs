@@ -1,10 +1,14 @@
+using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using Editor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace EasyBookmark
 {
@@ -20,7 +24,7 @@ namespace EasyBookmark
 		VisualElement box;
 		AssetCategorizer categorizer;
 		SaveData saveData;
-		List<string> assetPaths;
+		List<string> guids;
 
 		void CreateGUI()
 		{
@@ -30,30 +34,36 @@ namespace EasyBookmark
 			categorizer = new AssetCategorizer();
 
 			saveData = new SaveData(Const.SavePath);
-			assetPaths = new List<string>(saveData.Load());
+			guids = new List<string>(saveData.Load());
 
 			listView = rootVisualElement.Q<ListView>();
-			listView.itemsSource = assetPaths;
+			listView.itemsSource = guids;
 			listView.makeItem = () => new BookmarkItem();
 			listView.bindItem = (element, i) =>
 			{
-				var assetPath = assetPaths[i];
-				var category = categorizer.Categorize(assetPath);
+				var guid = guids[i];
 				var target = element as BookmarkItem;
-				target.Initialize(assetPath, category, this);
+				target.Initialize(guid, categorizer, this);
 			};
 			listView.selectionType = SelectionType.Single;
 			listView.itemHeight = BookmarkItem.Height;
-
+			
 			box = rootVisualElement.Q<VisualElement>("box");
 			box.RegisterCallback<DragPerformEvent>(OnDragPerform);
 			box.RegisterCallback<DragUpdatedEvent>(OnDragUpdate);
+			PostProcessor.RegisterAssetChangedCallback(OnAssetChanged);
 		}
 
 		void OnDisable()
 		{
 			box.UnregisterCallback<DragPerformEvent>(OnDragPerform);
 			box.UnregisterCallback<DragUpdatedEvent>(OnDragUpdate);
+			PostProcessor.UnregisterAssetChangedCallback(OnAssetChanged);
+		}
+
+		void OnAssetChanged()
+		{
+			listView.Refresh();
 		}
 		
 		void OnDragPerform(DragPerformEvent e)
@@ -65,17 +75,17 @@ namespace EasyBookmark
 			
 			foreach (var path in DragAndDrop.paths)
 			{
-				Debug.Log(path);
-				if (assetPaths.Any(p => p == path))
+				var guid = AssetDatabase.AssetPathToGUID(path);
+				if (guids.Any(x => x == guid))
 				{
 					continue;
 				}
 				
-				assetPaths.Add(path);
+				guids.Add(guid);
 			}
 
 			listView.Refresh();
-			saveData.Save(assetPaths);
+			saveData.Save(guids);
 		}
 
 		void OnDragUpdate(DragUpdatedEvent e)
@@ -111,14 +121,14 @@ namespace EasyBookmark
 
 		void ITestElementCallbackReceiver.OnDeleteButton(BookmarkItem item)
 		{
-			var index = assetPaths.IndexOf(item.AssetPath);
+			var index = guids.IndexOf(item.Guid);
 			if (index == -1)
 			{
 				return;
 			}
 
-			assetPaths.RemoveAt(index);
-			saveData.Save(assetPaths);
+			guids.RemoveAt(index);
+			saveData.Save(guids);
 			listView.Refresh();
 		}
 
@@ -140,8 +150,8 @@ namespace EasyBookmark
 				return;
 			}
 			
-			var beforeIndex = assetPaths.IndexOf(dragStartItem.AssetPath);
-			var afterIndex = assetPaths.IndexOf(item.AssetPath);
+			var beforeIndex = guids.IndexOf(dragStartItem.Guid);
+			var afterIndex = guids.IndexOf(item.Guid);
 
 			if (afterIndex > beforeIndex)
 			{
@@ -166,26 +176,26 @@ namespace EasyBookmark
 
 			if (afterIndex > beforeIndex)
 			{
-				var path = assetPaths[beforeIndex];
+				var guid = guids[beforeIndex];
 				for (var i = beforeIndex; i < afterIndex; i++)
 				{
-					assetPaths[i] = assetPaths[i + 1];
+					guids[i] = guids[i + 1];
 				}
 
-				assetPaths[afterIndex] = path;
+				guids[afterIndex] = guid;
 			}
 			else
 			{
-				var path = assetPaths[beforeIndex];
+				var guid = guids[beforeIndex];
 				for (var i = beforeIndex; i > afterIndex; i--)
 				{
-					assetPaths[i] = assetPaths[i - 1];
+					guids[i] = guids[i - 1];
 				}
 
-				assetPaths[afterIndex] = path;
+				guids[afterIndex] = guid;
 			}
 
-			saveData.Save(assetPaths);
+			saveData.Save(guids);
 			listView.Refresh();
 		}
 	}

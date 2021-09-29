@@ -1,6 +1,7 @@
 using System;
 using EasyBookmark;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
@@ -14,15 +15,17 @@ namespace Editor
 		static readonly string BottomBorderClass = "border-bottom";
 
 		public string AssetPath { get; private set; }
+		public string Guid { get; private set; }
 		public AssetCategory Category { get; private set; }
 
-		VisualElement root;
-		Label pathLabel;
-		Button openButton;
-		Button selectButton;
-		Button deleteButton;
-		ITestElementCallbackReceiver callbackReceiver;
+		readonly VisualElement root;
+		readonly Label pathLabel;
+		readonly Button openButton;
+		readonly Button selectButton;
+		readonly Button deleteButton;
 		
+		ITestElementCallbackReceiver callbackReceiver;
+		AssetCategorizer categorizer;
 		LinePosition linePosition;
 		bool hasEnter;
 
@@ -52,13 +55,16 @@ namespace Editor
 			RegisterCallback<DragUpdatedEvent>(OnDragUpdate);
 		}
 
-		public void Initialize(string assetPath, AssetCategory category, ITestElementCallbackReceiver callbackReceiver)
+		public void Initialize(string guid, AssetCategorizer categorizer, ITestElementCallbackReceiver callbackReceiver)
 		{
 			this.callbackReceiver = callbackReceiver;
+			this.categorizer = categorizer;
+			Guid = guid;
+			
+			AssetPath = AssetDatabase.GUIDToAssetPath(Guid);
+			var category = categorizer.Categorize(AssetPath);
 
-			AssetPath = assetPath;
-			pathLabel.text = assetPath;
-
+			pathLabel.text = AssetPath;
 			openButton.SetEnabled(category == AssetCategory.Scene || category == AssetCategory.Prefab);
 			selectButton.SetEnabled(category != AssetCategory.NotExists);
 		}

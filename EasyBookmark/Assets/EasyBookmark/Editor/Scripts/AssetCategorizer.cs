@@ -13,7 +13,7 @@ public class AssetCategorizer
 			throw new ArgumentNullException(nameof(path));
 		}
 
-		if (!File.Exists(path))
+		if (!File.Exists(path) && !Directory.Exists(path))
 		{
 			return AssetCategory.NotExists;
 		}
