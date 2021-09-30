@@ -1,11 +1,9 @@
 using System;
-using EasyBookmark;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
-namespace Editor
+namespace EasyBookmark
 {
 	public class BookmarkItem : VisualElement
 	{
@@ -23,7 +21,7 @@ namespace Editor
 		readonly Button openButton;
 		readonly Button selectButton;
 		readonly Button deleteButton;
-		
+
 		ITestElementCallbackReceiver callbackReceiver;
 		AssetCategorizer categorizer;
 		LinePosition linePosition;
@@ -60,7 +58,7 @@ namespace Editor
 			this.callbackReceiver = callbackReceiver;
 			this.categorizer = categorizer;
 			Guid = guid;
-			
+
 			AssetPath = AssetDatabase.GUIDToAssetPath(Guid);
 			var category = categorizer.Categorize(AssetPath);
 
@@ -138,7 +136,7 @@ namespace Editor
 		void EnableLine(LinePosition position)
 		{
 			DisableLine();
-			
+
 			if (position == LinePosition.Top)
 			{
 				root.AddToClassList(TopBorderClass);

@@ -1,6 +1,9 @@
-public enum LinePosition
+namespace EasyBookmark
 {
-	None,
-	Top,
-	Bottom,
+	public enum LinePosition
+	{
+		None,
+		Top,
+		Bottom,
+	}
 }

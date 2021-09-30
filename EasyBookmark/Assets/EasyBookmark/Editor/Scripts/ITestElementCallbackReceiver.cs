@@ -1,4 +1,4 @@
-namespace Editor
+namespace EasyBookmark
 {
 	public interface ITestElementCallbackReceiver
 	{

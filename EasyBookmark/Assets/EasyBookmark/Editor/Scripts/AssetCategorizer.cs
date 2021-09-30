@@ -1,33 +1,33 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
 
-public class AssetCategorizer
+namespace EasyBookmark
 {
-	public AssetCategory Categorize(string path)
+	public class AssetCategorizer
 	{
-		if (path == null)
+		public AssetCategory Categorize(string path)
 		{
-			throw new ArgumentNullException(nameof(path));
-		}
+			if (path == null)
+			{
+				throw new ArgumentNullException(nameof(path));
+			}
 
-		if (!File.Exists(path) && !Directory.Exists(path))
-		{
-			return AssetCategory.NotExists;
-		}
+			if (!File.Exists(path) && !Directory.Exists(path))
+			{
+				return AssetCategory.NotExists;
+			}
 
-		if (path.EndsWith(".prefab", StringComparison.InvariantCulture))
-		{
-			return AssetCategory.Prefab;
-		}
+			if (path.EndsWith(".prefab", StringComparison.InvariantCulture))
+			{
+				return AssetCategory.Prefab;
+			}
 
-		if (path.EndsWith(".unity", StringComparison.InvariantCulture))
-		{
-			return AssetCategory.Scene;
-		}
+			if (path.EndsWith(".unity", StringComparison.InvariantCulture))
+			{
+				return AssetCategory.Scene;
+			}
 
-		return AssetCategory.Other;
+			return AssetCategory.Other;
+		}
 	}
 }

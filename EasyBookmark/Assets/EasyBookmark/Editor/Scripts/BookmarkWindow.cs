@@ -1,30 +1,22 @@
-using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using Editor;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Object = UnityEngine.Object;
-using Random = UnityEngine.Random;
 
 namespace EasyBookmark
 {
 	public class BookmarkWindow : EditorWindow, ITestElementCallbackReceiver
 	{
-		[MenuItem("aa/bb")]
-		public static void Aaa()
-		{
-			GetWindow<BookmarkWindow>();
-		}
-
 		ListView listView;
 		VisualElement box;
 		AssetCategorizer categorizer;
 		SaveData saveData;
 		List<string> guids;
+
+		BookmarkItem dragStartItem;
+		
 
 		void CreateGUI()
 		{
@@ -47,7 +39,7 @@ namespace EasyBookmark
 			};
 			listView.selectionType = SelectionType.Single;
 			listView.itemHeight = BookmarkItem.Height;
-			
+
 			box = rootVisualElement.Q<VisualElement>("box");
 			box.RegisterCallback<DragPerformEvent>(OnDragPerform);
 			box.RegisterCallback<DragUpdatedEvent>(OnDragUpdate);
@@ -65,14 +57,14 @@ namespace EasyBookmark
 		{
 			listView.Refresh();
 		}
-		
+
 		void OnDragPerform(DragPerformEvent e)
 		{
 			if (!DragAndDrop.paths.Any())
 			{
 				return;
 			}
-			
+
 			foreach (var path in DragAndDrop.paths)
 			{
 				var guid = AssetDatabase.AssetPathToGUID(path);
@@ -80,7 +72,7 @@ namespace EasyBookmark
 				{
 					continue;
 				}
-				
+
 				guids.Add(guid);
 			}
 
@@ -132,8 +124,6 @@ namespace EasyBookmark
 			listView.Refresh();
 		}
 
-
-		BookmarkItem dragStartItem;
 		void ITestElementCallbackReceiver.OnDragStart(BookmarkItem item)
 		{
 			dragStartItem = item;
@@ -149,7 +139,7 @@ namespace EasyBookmark
 			{
 				return;
 			}
-			
+
 			var beforeIndex = guids.IndexOf(dragStartItem.Guid);
 			var afterIndex = guids.IndexOf(item.Guid);
 
@@ -167,12 +157,12 @@ namespace EasyBookmark
 					++afterIndex;
 				}
 			}
-			
+
 			if (beforeIndex == afterIndex)
 			{
 				return;
 			}
-			
+
 
 			if (afterIndex > beforeIndex)
 			{

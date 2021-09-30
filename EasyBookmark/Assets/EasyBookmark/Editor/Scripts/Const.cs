@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Editor
+namespace EasyBookmark
 {
 	public static class Const
 	{
