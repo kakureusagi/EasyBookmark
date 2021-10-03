@@ -5,29 +5,39 @@ namespace EasyBookmark
 {
 	public class AssetCategorizer
 	{
-		public AssetCategory Categorize(string path)
+		public AssetCategory Categorize(string assetPath)
 		{
-			if (path == null)
+			if (assetPath == null)
 			{
-				throw new ArgumentNullException(nameof(path));
+				throw new ArgumentNullException(nameof(assetPath));
 			}
 
-			if (!File.Exists(path) && !Directory.Exists(path))
+			if (assetPath == "")
 			{
-				return AssetCategory.NotExists;
+				throw new ArgumentOutOfRangeException(nameof(assetPath));
 			}
 
-			if (path.EndsWith(".prefab", StringComparison.InvariantCulture))
+			if (Directory.Exists(assetPath))
 			{
-				return AssetCategory.Prefab;
+				return AssetCategory.Directory;
 			}
 
-			if (path.EndsWith(".unity", StringComparison.InvariantCulture))
+			if (File.Exists(assetPath))
 			{
-				return AssetCategory.Scene;
+				if (assetPath.EndsWith(".prefab", StringComparison.InvariantCultureIgnoreCase))
+				{
+					return AssetCategory.Prefab;
+				}
+
+				if (assetPath.EndsWith(".unity", StringComparison.InvariantCultureIgnoreCase))
+				{
+					return AssetCategory.Scene;
+				}
+
+				return AssetCategory.Other;
 			}
 
-			return AssetCategory.Other;
+			return AssetCategory.NotExists;
 		}
 	}
 }

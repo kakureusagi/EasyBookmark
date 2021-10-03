@@ -12,8 +12,19 @@
     border-bottom-color: white;
 }
 
+#texture {
+    margin: 1px 3px;
+    padding: 1px 6px;
+    width: 16px;
+    height: 16px;
+}
+
 #path {
     overflow: hidden;
     -unity-text-align: middle-left;
     flex-grow: 1;
+}
+
+.not-exists {
+    color: rgb(100, 100, 100);
 }

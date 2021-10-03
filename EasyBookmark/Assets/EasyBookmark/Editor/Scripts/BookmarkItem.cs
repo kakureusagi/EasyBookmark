@@ -1,5 +1,6 @@
 using System;
 using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
@@ -11,21 +12,23 @@ namespace EasyBookmark
 
 		static readonly string TopBorderClass = "border-top";
 		static readonly string BottomBorderClass = "border-bottom";
+		static readonly string NotExistsClass = "not-exists";
 
 		public string AssetPath { get; private set; }
 		public string Guid { get; private set; }
 		public AssetCategory Category { get; private set; }
 
 		readonly VisualElement root;
+		readonly VisualElement texture;
 		readonly Label pathLabel;
 		readonly Button openButton;
 		readonly Button selectButton;
 		readonly Button deleteButton;
 
 		ITestElementCallbackReceiver callbackReceiver;
-		AssetCategorizer categorizer;
 		LinePosition linePosition;
-		bool hasEnter;
+		bool hasEntered;
+		Vector2 mouseDownPosition;
 
 		public BookmarkItem()
 		{
@@ -34,6 +37,8 @@ namespace EasyBookmark
 			hierarchy.Add(container);
 
 			root = container.Q<VisualElement>("root");
+
+			texture = container.Q<VisualElement>("texture");
 
 			pathLabel = container.Q<Label>("path");
 
@@ -46,25 +51,35 @@ namespace EasyBookmark
 			deleteButton = container.Q<Button>("deleteButton");
 			deleteButton.clicked += OnDeleteButton;
 
-			RegisterCallback<MouseDownEvent>(OnMouseDown);
+			RegisterCallback<PointerDownEvent>(OnPointerDown);
+			RegisterCallback<PointerMoveEvent>(OnPointerMove);
+			RegisterCallback<PointerUpEvent>(OnPointerUp);
 			RegisterCallback<DragEnterEvent>(OnDragEnter);
 			RegisterCallback<DragLeaveEvent>(OnDragLeave);
 			RegisterCallback<DragPerformEvent>(OnDragPerform);
 			RegisterCallback<DragUpdatedEvent>(OnDragUpdate);
 		}
 
-		public void Initialize(string guid, AssetCategorizer categorizer, ITestElementCallbackReceiver callbackReceiver)
+		public void Initialize(string guid, string assetPath, AssetCategory category, ITestElementCallbackReceiver callbackReceiver)
 		{
-			this.callbackReceiver = callbackReceiver;
-			this.categorizer = categorizer;
 			Guid = guid;
+			AssetPath = assetPath;
+			Category = category;
+			this.callbackReceiver = callbackReceiver;
 
-			AssetPath = AssetDatabase.GUIDToAssetPath(Guid);
-			var category = categorizer.Categorize(AssetPath);
+			if (category == AssetCategory.NotExists)
+			{
+				pathLabel.text = AssetPath + " <color=yellow>(DELETED)</color>";
+				pathLabel.AddToClassList(NotExistsClass);
+			}
+			else
+			{
+				pathLabel.text = AssetPath;
+			}
 
-			pathLabel.text = AssetPath;
 			openButton.SetEnabled(category == AssetCategory.Scene || category == AssetCategory.Prefab);
 			selectButton.SetEnabled(category != AssetCategory.NotExists);
+			texture.style.backgroundImage = new StyleBackground(AssetDatabase.GetCachedIcon(AssetPath) as Texture2D);
 		}
 
 		void OnOpenButton()
@@ -91,17 +106,23 @@ namespace EasyBookmark
 		{
 			if (DragAndDrop.GetGenericData(nameof(BookmarkItem)) != null)
 			{
-				hasEnter = true;
+				hasEntered = true;
 			}
 		}
 
 		void OnDragUpdate(DragUpdatedEvent e)
 		{
-			if (hasEnter)
+			if (hasEntered)
 			{
 				linePosition = e.localMousePosition.y > Height / 2.0f ? LinePosition.Bottom : LinePosition.Top;
-				DragAndDrop.visualMode = DragAndDropVisualMode.Move;
-				EnableLine(linePosition);
+
+				if (e.mousePosition != mouseDownPosition)
+				{
+					DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+					EnableLine(linePosition);
+				}
+
+				e.StopImmediatePropagation();
 			}
 			else
 			{
@@ -112,16 +133,19 @@ namespace EasyBookmark
 
 		void OnDragPerform(DragPerformEvent e)
 		{
-			if (hasEnter)
+			if (hasEntered)
 			{
 				callbackReceiver.OnDragPerform(this, linePosition);
 				linePosition = LinePosition.None;
 				DisableLine();
-				hasEnter = false;
+				hasEntered = false;
+
+				DragAndDrop.paths = null;
+				DragAndDrop.objectReferences = null;
 			}
 		}
 
-		void OnMouseDown(MouseDownEvent e)
+		void OnPointerDown(PointerDownEvent e)
 		{
 			DragAndDrop.paths = Array.Empty<string>();
 			DragAndDrop.objectReferences = Array.Empty<Object>();
@@ -130,7 +154,16 @@ namespace EasyBookmark
 			DragAndDrop.StartDrag(nameof(BookmarkItem));
 
 			callbackReceiver.OnDragStart(this);
-			hasEnter = true;
+			mouseDownPosition = e.originalMousePosition;
+			hasEntered = true;
+		}
+
+		void OnPointerUp(PointerUpEvent evt)
+		{
+		}
+
+		void OnPointerMove(PointerMoveEvent e)
+		{
 		}
 
 		void EnableLine(LinePosition position)

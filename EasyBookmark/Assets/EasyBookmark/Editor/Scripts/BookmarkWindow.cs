@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,22 +10,32 @@ namespace EasyBookmark
 	{
 		ListView listView;
 		VisualElement box;
-		AssetCategorizer categorizer;
 		SaveData saveData;
 		List<string> guids;
+		HashSet<string> assetPaths;
 
 		BookmarkItem dragStartItem;
-		
+
+		readonly Dictionary<AssetCategory, IAssetBehaviour> assetBehaviours = new Dictionary<AssetCategory, IAssetBehaviour>
+		{
+			{ AssetCategory.Directory, new DirectoryAssetBehaviour() },
+			{ AssetCategory.Other, new OtherAssetBehaviour() },
+			{ AssetCategory.Prefab, new PrefabAssetBehaviour() },
+			{ AssetCategory.Scene, new SceneAssetBehaviour() },
+			{ AssetCategory.NotExists, new NullAssetBehaviour() },
+		};
+
 
 		void CreateGUI()
 		{
 			var treeStorage = VisualTreeStorage.Load();
 			treeStorage.BookmarkWindow.CloneTree(rootVisualElement);
 
-			categorizer = new AssetCategorizer();
+			var categorizer = new AssetCategorizer();
 
 			saveData = new SaveData(Const.SavePath);
 			guids = new List<string>(saveData.Load());
+			assetPaths = new HashSet<string>(guids.Select(guid => AssetDatabase.GUIDToAssetPath(guid)));
 
 			listView = rootVisualElement.Q<ListView>();
 			listView.itemsSource = guids;
@@ -35,7 +44,9 @@ namespace EasyBookmark
 			{
 				var guid = guids[i];
 				var target = element as BookmarkItem;
-				target.Initialize(guid, categorizer, this);
+				var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+				var category = categorizer.Categorize(assetPath);
+				target.Initialize(guid, assetPath, category, this);
 			};
 			listView.selectionType = SelectionType.Single;
 			listView.itemHeight = BookmarkItem.Height;
@@ -67,13 +78,13 @@ namespace EasyBookmark
 
 			foreach (var path in DragAndDrop.paths)
 			{
-				var guid = AssetDatabase.AssetPathToGUID(path);
-				if (guids.Any(x => x == guid))
+				if (assetPaths.Contains(path))
 				{
 					continue;
 				}
 
-				guids.Add(guid);
+				guids.Add(AssetDatabase.AssetPathToGUID(path));
+				assetPaths.Add(path);
 			}
 
 			listView.Refresh();
@@ -82,33 +93,26 @@ namespace EasyBookmark
 
 		void OnDragUpdate(DragUpdatedEvent e)
 		{
-			DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+			foreach (var path in DragAndDrop.paths)
+			{
+				if (!assetPaths.Contains(path))
+				{
+					DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+					return;
+				}
+			}
+
+			DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
 		}
 
 		void ITestElementCallbackReceiver.OnSelectButton(BookmarkItem item)
 		{
-			if (item.Category == AssetCategory.NotExists)
-			{
-				return;
-			}
-
-			Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(item.AssetPath);
+			assetBehaviours[item.Category].Select(item.AssetPath);
 		}
 
 		void ITestElementCallbackReceiver.OnOpenButton(BookmarkItem item)
 		{
-			if (item.Category == AssetCategory.Scene)
-			{
-				if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-				{
-					EditorSceneManager.OpenScene(item.AssetPath);
-				}
-			}
-			else if (item.Category == AssetCategory.Prefab)
-			{
-				var asset = AssetDatabase.LoadAssetAtPath<Object>(item.AssetPath);
-				AssetDatabase.OpenAsset(asset);
-			}
+			assetBehaviours[item.Category].Open(item.AssetPath);
 		}
 
 		void ITestElementCallbackReceiver.OnDeleteButton(BookmarkItem item)
@@ -120,6 +124,7 @@ namespace EasyBookmark
 			}
 
 			guids.RemoveAt(index);
+			assetPaths.Remove(item.AssetPath);
 			saveData.Save(guids);
 			listView.Refresh();
 		}

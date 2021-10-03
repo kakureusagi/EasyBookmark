@@ -5,6 +5,7 @@ namespace EasyBookmark
 		Prefab,
 		Scene,
 		Other,
+		Directory,
 		NotExists,
 	}
 }
