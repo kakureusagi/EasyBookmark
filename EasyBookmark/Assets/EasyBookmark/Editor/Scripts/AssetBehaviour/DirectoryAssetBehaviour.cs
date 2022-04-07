@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using UnityEditor;
-using Object = UnityEngine.Object;
 
 namespace EasyBookmark
 {
@@ -22,7 +21,7 @@ namespace EasyBookmark
 
 				projectBrowserType = editorAssembly.GetType("UnityEditor.ProjectBrowser");
 				GetFolderInstanceIdsMethod = projectBrowserType.GetMethod("GetFolderInstanceIDs", BindingFlags.NonPublic | BindingFlags.Static);
-				SetFolderSelectionMethod = projectBrowserType.GetMethod("SetFolderSelection", BindingFlags.NonPublic | BindingFlags.Instance);
+				SetFolderSelectionMethod = projectBrowserType.GetMethod("SetFolderSelection", 0, BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(int[]), typeof(bool) }, null);
 				ViewModeField = projectBrowserType.GetField("m_ViewMode", BindingFlags.NonPublic | BindingFlags.Instance);
 				OpenSelectedFoldersMethod = projectBrowserType.GetMethod("OpenSelectedFolders", BindingFlags.NonPublic | BindingFlags.Static);
 			}
