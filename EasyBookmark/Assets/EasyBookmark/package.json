@@ -1,0 +1,13 @@
+{
+    "name": "jp.kakureusagi.easy-bookmark",
+    "version": "1.0.0",
+    "displayName": "EasyBookmark",
+    "description": "Bookmark window for Unity",
+    "unity": "2021.2",
+    "keywords": [
+       "bookmark"
+    ],
+    "author": {
+      "name": "kakureusagi"
+    }
+}
